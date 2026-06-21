@@ -1,5 +1,5 @@
 import multer from 'multer';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import { extname } from 'path';
 import { StorageService } from '../services/storageService.js';
 
@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
     cb(null, StorageService.getUploadsDir());
   },
   filename: (req, file, cb) => {
-    const uniqueName = `${uuidv4()}${extname(file.originalname)}`;
+    const uniqueName = `${crypto.randomUUID()}${extname(file.originalname)}`;
     cb(null, uniqueName);
   },
 });
