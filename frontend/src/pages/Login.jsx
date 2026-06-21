@@ -20,7 +20,7 @@ export default function Login() {
     setSubmitting(true);
     try {
       const user = await login({ email, password });
-      navigate(user.role === 'inquilino' ? '/perfil' : '/');
+      navigate(user.role === 'inquilino' ? '/perfil' : '/mis-propiedades');
     } catch (err) {
       setServerError(getErrorMessage(err, 'Email o contraseña incorrectos.'));
     } finally {

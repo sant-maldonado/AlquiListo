@@ -32,7 +32,7 @@ export default function Register() {
     setSubmitting(true);
     try {
       await register({ email, password, role });
-      navigate(role === 'inquilino' ? '/perfil' : '/');
+      navigate(role === 'inquilino' ? '/perfil' : '/mis-propiedades');
     } catch (err) {
       setServerError(getErrorMessage(err, 'No pudimos crear tu cuenta. Probá de nuevo.'));
     } finally {

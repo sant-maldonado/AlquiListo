@@ -3,6 +3,8 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Home() {
   const { user, logout } = useAuth();
+  const dashboardPath = user?.role === 'propietario' ? '/mis-propiedades' : '/perfil';
+  const dashboardLabel = user?.role === 'propietario' ? 'Mis propiedades' : 'Mi perfil';
 
   return (
     <div className="min-h-screen px-6 py-12">
@@ -10,9 +12,14 @@ export default function Home() {
         <div className="flex items-center justify-between">
           <span className="font-display text-2xl font-semibold text-ink">AlquiListo</span>
           {user ? (
-            <button onClick={logout} className="font-sans text-sm text-ink/60 hover:text-ink">
-              Cerrar sesión
-            </button>
+            <div className="flex items-center gap-4 font-sans text-sm">
+              <Link to={dashboardPath} className="font-medium text-forest hover:underline">
+                {dashboardLabel}
+              </Link>
+              <button onClick={logout} className="text-ink/60 hover:text-ink">
+                Cerrar sesión
+              </button>
+            </div>
           ) : (
             <div className="flex gap-4 font-sans text-sm">
               <Link to="/login" className="text-ink/60 hover:text-ink">
@@ -36,9 +43,12 @@ export default function Home() {
         </p>
 
         {user && (
-          <p className="mt-8 rounded-lg bg-forest/10 px-4 py-3 font-sans text-sm text-forest-dark">
-            Hola, {user.email} — sesión iniciada como {user.role}.
-          </p>
+          <Link
+            to={dashboardPath}
+            className="mt-8 inline-block rounded-lg bg-forest px-5 py-3 font-sans text-sm font-medium text-cream hover:bg-forest-dark"
+          >
+            Ir a {dashboardLabel.toLowerCase()} →
+          </Link>
         )}
       </div>
     </div>
