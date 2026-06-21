@@ -6,7 +6,7 @@ export const DocumentService = {
     formData.append('file', file);
     formData.append('type', type);
 
-    const headers = { 'Content-Type': 'multipart/form-data' };
+    const headers = {};
     if (guarantorToken) {
       headers['X-Guarantor-Token'] = guarantorToken;
     }
