@@ -1,4 +1,4 @@
-import { ClaudeClient } from './claudeClient.js';
+import { GroqClient } from './groqClient.js';
 
 const SYSTEM_PROMPT = `Sos un asistente que traduce búsquedas de alquileres en
 lenguaje natural (en español rioplatense) a filtros estructurados. Devolvé
@@ -32,7 +32,7 @@ Reglas:
 
 export const SearchInterpreterService = {
   async parseQuery(naturalLanguageQuery) {
-    return ClaudeClient.askForJson({
+    return GroqClient.askForJson({
       system: SYSTEM_PROMPT,
       prompt: naturalLanguageQuery,
       maxTokens: 512,

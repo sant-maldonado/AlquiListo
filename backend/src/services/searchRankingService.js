@@ -1,4 +1,4 @@
-import { ClaudeClient } from './claudeClient.js';
+import { GroqClient } from './groqClient.js';
 
 const SYSTEM_PROMPT = `Sos un asistente que ayuda a ordenar propiedades de
 alquiler según qué tan bien encajan con lo que la persona busca. Te paso lo
@@ -42,7 +42,7 @@ export const SearchRankingService = {
 
     const prompt = `Búsqueda de la persona: "${query}"\n\nPropiedades candidatas:\n${JSON.stringify(candidatesPayload, null, 2)}`;
 
-    const result = await ClaudeClient.askForJson({
+    const result = await GroqClient.askForJson({
       system: SYSTEM_PROMPT,
       prompt,
       maxTokens: 2048,

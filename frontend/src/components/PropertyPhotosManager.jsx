@@ -11,15 +11,14 @@ export default function PropertyPhotosManager({ propertyId, initialPhotos = [], 
   const [uploading, setUploading] = useState(false);
   const [removingId, setRemovingId] = useState(null);
   const inputRef = useRef(null);
-  const isFirstRender = useRef(true);
   const onPhotosChangeRef = useRef(onPhotosChange);
   onPhotosChangeRef.current = onPhotosChange;
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
+    setPhotos(initialPhotos);
+  }, [initialPhotos]);
+
+  useEffect(() => {
     onPhotosChangeRef.current?.(photos);
   }, [photos]);
 

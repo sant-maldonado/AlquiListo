@@ -6,12 +6,12 @@ import { getErrorMessage } from '../utils/errors';
 import { InlineLoader, LoadError } from '../components/LoadingStates';
 
 const STATUS_CONFIG = {
-  pending: { label: 'En revisión', className: 'bg-line/60 text-ink/60' },
-  accepted: { label: '¡Aceptada!', className: 'bg-forest/15 text-forest-dark' },
-  rejected: { label: 'No fue elegida', className: 'bg-terracotta/10 text-terracotta-dark/70' },
+  pending: { label: 'Pendiente', className: 'bg-line/60 text-ink/60' },
+  accepted: { label: 'Aceptado', className: 'bg-forest/15 text-forest-dark' },
+  rejected: { label: 'Rechazado', className: 'bg-terracotta/10 text-terracotta-dark/70' },
 };
 
-export default function MisPostulaciones() {
+export default function PostulacionesRecibidas() {
   const { logout } = useAuth();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,9 +20,9 @@ export default function MisPostulaciones() {
   const fetch = useCallback(() => {
     setLoading(true);
     setLoadError(null);
-    ApplicationService.listMine()
+    ApplicationService.listForOwner()
       .then(setApplications)
-      .catch((err) => setLoadError(getErrorMessage(err, 'No pudimos cargar tus postulaciones.')))
+      .catch((err) => setLoadError(getErrorMessage(err, 'No pudimos cargar las postulaciones.')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -32,29 +32,29 @@ export default function MisPostulaciones() {
 
   return (
     <div className="min-h-screen px-6 py-10">
-      <div className="mx-auto max-w-xl">
+      <div className="mx-auto max-w-2xl">
         <div className="flex items-center justify-between">
           <span className="font-display text-xl font-semibold text-ink">AlquiListo</span>
           <div className="flex items-center gap-4 font-sans text-sm">
-            <Link to="/buscar" className="text-ink/60 hover:text-ink">Buscar</Link>
+            <Link to="/mis-propiedades" className="text-ink/60 hover:text-ink">Mis propiedades</Link>
             <button onClick={logout} className="text-ink/60 hover:text-ink">Cerrar sesión</button>
           </div>
         </div>
 
-        <h1 className="mt-10 font-display text-2xl font-medium text-ink">Tus postulaciones</h1>
+        <h1 className="mt-10 font-display text-2xl font-medium text-ink">Postulaciones recibidas</h1>
         <p className="mt-1 font-sans text-sm text-ink/60">
-          Acá vas a ver el estado de cada propiedad a la que te postulaste.
+          Todas las postulaciones de tus propiedades.
         </p>
 
         <div className="mt-8">
-          {loading && <InlineLoader label="Cargando tus postulaciones…" />}
+          {loading && <InlineLoader label="Cargando postulaciones…" />}
           {loadError && <LoadError message={loadError} onRetry={fetch} />}
 
           {!loading && !loadError && applications.length === 0 && (
             <div className="rounded-lg border border-dashed border-line bg-white p-8 text-center">
-              <p className="font-sans text-sm text-ink/60">Todavía no te postulaste a ninguna propiedad.</p>
-              <Link to="/buscar" className="mt-2 inline-block font-sans text-sm font-medium text-forest hover:underline">
-                Buscar propiedades →
+              <p className="font-sans text-sm text-ink/60">Todavía no recibiste ninguna postulación.</p>
+              <Link to="/mis-propiedades" className="mt-2 inline-block font-sans text-sm font-medium text-forest hover:underline">
+                Ir a mis propiedades →
               </Link>
             </div>
           )}
@@ -66,9 +66,14 @@ export default function MisPostulaciones() {
                 <div key={app.id} className="rounded-lg border border-line bg-white p-4">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="font-sans text-sm font-medium text-ink">{app.property_title}</p>
+                      <p className="font-sans text-sm font-medium text-ink">
+                        {app.first_name} {app.last_name}
+                      </p>
                       <p className="mt-0.5 font-sans text-xs text-ink/50">
-                        ${Number(app.property_price).toLocaleString('es-AR')} · {app.property_address}
+                        {app.property_title} · ${Number(app.property_price).toLocaleString('es-AR')}
+                      </p>
+                      <p className="mt-0.5 font-sans text-xs text-ink/40">
+                        Score: {app.trust_score_snapshot}/100
                       </p>
                     </div>
                     <span className={`rounded-full px-2.5 py-1 font-sans text-xs font-medium ${s.className}`}>

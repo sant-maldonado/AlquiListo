@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import DocumentUploader from './DocumentUploader';
+import { DocumentService } from '../services/documentService';
 import { GuarantorService } from '../services/guarantorService';
 import { getErrorMessage } from '../utils/errors';
 import { InlineLoader, LoadError } from './LoadingStates';
@@ -10,37 +11,55 @@ const DOC_TYPE_BY_GUARANTOR_TYPE = {
   recibo_tercero: { type: 'recibo_sueldo', label: 'Recibo de sueldo del garante' },
 };
 
-export default function StepDocumentos({ onFinish }) {
+export default function StepDocumentos({ onFinish, profile }) {
   const [guarantors, setGuarantors] = useState([]);
+  const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
 
-  function fetchGuarantors() {
+  const load = useCallback(() => {
     setLoading(true);
     setLoadError(null);
-    GuarantorService.list()
-      .then(setGuarantors)
-      .catch((err) => setLoadError(getErrorMessage(err, 'No pudimos cargar tus garantes.')))
+    Promise.all([
+      GuarantorService.list(),
+      profile?.id ? DocumentService.listForProfile(profile.id) : Promise.resolve([]),
+    ])
+      .then(([gs, docs]) => {
+        setGuarantors(gs);
+        setDocuments(docs);
+      })
+      .catch((err) => setLoadError(getErrorMessage(err, 'No pudimos cargar los datos.')))
       .finally(() => setLoading(false));
-  }
+  }, [profile?.id]);
 
-  useEffect(fetchGuarantors, []);
+  useEffect(() => { load(); }, [load]);
+
+  function getDocStatus(type) {
+    return documents.find((d) => d.type === type)?.ai_status || null;
+  }
 
   if (loading) {
     return <InlineLoader label="Cargando…" />;
   }
 
   if (loadError) {
-    return <LoadError message={loadError} onRetry={fetchGuarantors} />;
+    return <LoadError message={loadError} onRetry={load} />;
+  }
+
+  function handleDocUploaded(doc) {
+    setDocuments((list) => {
+      const filtered = list.filter((d) => d.type !== doc.type);
+      return [...filtered, doc];
+    });
   }
 
   return (
     <div className="space-y-6">
       <div>
         <p className="mb-3 font-sans text-sm font-medium text-ink">Tu documentación</p>
-        <DocumentUploader label="DNI (frente)" type="dni_front" />
+        <DocumentUploader label="DNI (frente)" type="dni_front" initialStatus={getDocStatus('dni_front')} onUploaded={handleDocUploaded} />
         <div className="mt-2">
-          <DocumentUploader label="DNI (dorso)" type="dni_back" />
+          <DocumentUploader label="DNI (dorso)" type="dni_back" initialStatus={getDocStatus('dni_back')} onUploaded={handleDocUploaded} />
         </div>
       </div>
 
@@ -56,6 +75,8 @@ export default function StepDocumentos({ onFinish }) {
                   label={`${g.full_name} — ${docConfig.label}`}
                   type={docConfig.type}
                   guarantorToken={g.invite_token}
+                  initialStatus={getDocStatus(docConfig.type)}
+                  onUploaded={handleDocUploaded}
                 />
               );
             })}

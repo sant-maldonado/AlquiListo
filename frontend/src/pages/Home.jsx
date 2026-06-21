@@ -11,7 +11,7 @@ export default function Home() {
     <div className="min-h-screen px-6 py-12">
       <div className="mx-auto max-w-3xl">
         <div className="flex items-center justify-between">
-          <Link to="/" className="font-display text-2xl font-semibold text-ink hover:text-forest">AlquiListo</Link>
+          <span className="font-display text-2xl font-semibold text-ink">AlquiListo</span>
           {user ? (
             <div className="flex items-center gap-4 font-sans text-sm">
               {!isOwner && (

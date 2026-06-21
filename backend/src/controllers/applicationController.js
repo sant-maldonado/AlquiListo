@@ -53,6 +53,16 @@ export const ApplicationController = {
     }
   },
 
+  async listForOwner(req, res) {
+    try {
+      const applications = await ApplicationModel.findByOwnerId(req.user.id);
+      return res.json({ applications });
+    } catch (err) {
+      console.error('Error en listForOwner:', err);
+      return res.status(500).json({ error: 'Error al listar las postulaciones' });
+    }
+  },
+
   async listForProperty(req, res) {
     try {
       const owns = await PropertyModel.belongsToOwner(req.params.propertyId, req.user.id);

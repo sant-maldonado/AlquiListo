@@ -21,6 +21,11 @@ export const ApplicationService = {
     return data.application;
   },
 
+  async listForOwner() {
+    const { data } = await api.get('/applications/mine-as-owner');
+    return data.applications;
+  },
+
   async reject(id) {
     const { data } = await api.post(`/applications/${id}/reject`);
     return data.application;

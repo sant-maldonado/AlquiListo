@@ -8,6 +8,7 @@ import { InlineLoader, LoadError } from '../components/LoadingStates';
 import PropertyStatusBadge from '../components/PropertyStatusBadge';
 import PropertyForm from '../components/PropertyForm';
 import PropertyPhotosManager from '../components/PropertyPhotosManager';
+import ApplicationsList from '../components/ApplicationsList';
 
 const STATUS_ACTIONS = {
   draft: [{ to: 'published', label: 'Publicar' }],
@@ -85,7 +86,7 @@ export default function MisPropiedades() {
     <div className="min-h-screen px-6 py-10">
       <div className="mx-auto max-w-3xl">
         <div className="flex items-center justify-between">
-          <Link to="/" className="font-display text-xl font-semibold text-ink hover:text-forest">AlquiListo</Link>
+          <span className="font-display text-xl font-semibold text-ink">AlquiListo</span>
           <button onClick={logout} className="font-sans text-sm text-ink/60 hover:text-ink">
             Cerrar sesión
           </button>
@@ -100,12 +101,20 @@ export default function MisPropiedades() {
                   Publicá, pausá o editá tus avisos.
                 </p>
               </div>
-              <button
-                onClick={() => setView('new')}
-                className="rounded-lg bg-forest px-4 py-2.5 font-sans text-sm font-medium text-cream hover:bg-forest-dark"
-              >
-                + Nueva propiedad
-              </button>
+              <div className="flex gap-2">
+                <Link
+                  to="/postulaciones-recibidas"
+                  className="rounded-lg border border-line px-4 py-2.5 font-sans text-sm font-medium text-ink hover:border-forest hover:text-forest"
+                >
+                  Postulaciones
+                </Link>
+                <button
+                  onClick={() => setView('new')}
+                  className="rounded-lg bg-forest px-4 py-2.5 font-sans text-sm font-medium text-cream hover:bg-forest-dark"
+                >
+                  + Nueva propiedad
+                </button>
+              </div>
             </div>
 
             <div className="mt-8">
@@ -218,6 +227,16 @@ export default function MisPropiedades() {
 
             {selected.description && (
               <p className="mt-8 font-sans text-sm leading-relaxed text-ink/70">{selected.description}</p>
+            )}
+
+            {(selected.status === 'published' || selected.status === 'rented') && (
+              <div className="mt-10">
+                <p className="mb-3 font-sans text-sm font-medium text-ink">Postulantes</p>
+                <ApplicationsList
+                  propertyId={selected.id}
+                  onPropertyRented={() => setSelected((s) => ({ ...s, status: 'rented' }))}
+                />
+              </div>
             )}
           </div>
         )}

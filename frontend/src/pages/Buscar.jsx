@@ -46,7 +46,7 @@ export default function Buscar() {
     <div className="min-h-screen px-6 py-10">
       <div className="mx-auto max-w-2xl">
         <div className="flex items-center justify-between">
-          <Link to="/" className="font-display text-xl font-semibold text-ink hover:text-forest">AlquiListo</Link>
+          <span className="font-display text-xl font-semibold text-ink">AlquiListo</span>
           <div className="flex items-center gap-4 font-sans text-sm">
             <Link to="/mis-postulaciones" className="text-ink/60 hover:text-ink">Mis postulaciones</Link>
             <Link to="/perfil" className="text-ink/60 hover:text-ink">Mi perfil</Link>

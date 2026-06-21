@@ -75,6 +75,22 @@ export const ApplicationModel = {
     return result.rows[0] || null;
   },
 
+  async findByOwnerId(ownerId) {
+    const result = await query(
+      `SELECT
+         a.id, a.status, a.trust_score_snapshot, a.created_at, a.decided_at,
+         p.id AS property_id, p.title AS property_title, p.price AS property_price,
+         pr.id AS profile_id, pr.first_name, pr.last_name, pr.verification_status
+       FROM applications a
+       JOIN properties p ON p.id = a.property_id
+       JOIN profiles pr ON pr.id = a.profile_id
+       WHERE p.owner_id = $1
+       ORDER BY a.created_at DESC`,
+      [ownerId]
+    );
+    return result.rows;
+  },
+
   async belongsToPropertyOwner(applicationId, ownerId) {
     const result = await query(
       `SELECT a.id FROM applications a

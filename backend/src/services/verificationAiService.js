@@ -68,6 +68,10 @@ function parseJsonResponse(text) {
 
 export const VerificationAiService = {
   async analyzeDocument({ type, fileUrl }) {
+    if (process.env.AI_MOCK === 'true') {
+      return this._mockAnalysis();
+    }
+
     const prompt = PROMPTS_BY_TYPE[type] || PROMPTS_BY_TYPE.otro;
     const { base64, mimeType } = StorageService.readFileAsBase64(fileUrl);
 
@@ -110,6 +114,15 @@ export const VerificationAiService = {
     }
 
     return parseJsonResponse(textBlock.text);
+  },
+
+  _mockAnalysis() {
+    return {
+      document_looks_valid: true,
+      extracted: {},
+      confidence: 0.95,
+      red_flags: [],
+    };
   },
 
   decideStatus(aiResult) {

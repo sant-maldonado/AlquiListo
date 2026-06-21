@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { ProfileService } from '../services/profileService';
@@ -13,6 +13,7 @@ import { PageLoader, LoadError } from '../components/LoadingStates';
 export default function Perfil() {
   const { user, logout } = useAuth();
   const toast = useToast();
+  const navigate = useNavigate();
   const [step, setStep] = useState('perfil');
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,7 +26,11 @@ export default function Perfil() {
     ProfileService.getMyProfile()
       .then((p) => {
         setProfile(p);
-        setStep('garantes');
+        if (p.verification_status === 'in_review' || p.verification_status === 'verified') {
+          setStep('busqueda');
+        } else {
+          setStep('garantes');
+        }
       })
       .catch((err) => {
         if (err.response?.status !== 404) {
@@ -72,7 +77,7 @@ export default function Perfil() {
       <div className="flex flex-col px-6 py-10">
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
           <div className="flex items-center justify-between">
-            <Link to="/" className="font-display text-xl font-semibold text-ink hover:text-forest">AlquiListo</Link>
+            <span className="font-display text-xl font-semibold text-ink">AlquiListo</span>
             <div className="flex items-center gap-3 font-sans text-sm">
               <Link to="/mis-postulaciones" className="text-ink/60 hover:text-ink">Mis postulaciones</Link>
               <button onClick={logout} className="text-ink/60 hover:text-ink">Cerrar sesión</button>
@@ -98,7 +103,7 @@ export default function Perfil() {
               <StepGarantes onContinue={() => setStep('busqueda')} />
             )}
             {step === 'busqueda' && (
-              <StepDocumentos onFinish={() => setStep('busqueda')} />
+              <StepDocumentos profile={profile} onFinish={() => navigate('/buscar')} />
             )}
           </div>
 

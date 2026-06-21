@@ -2,8 +2,9 @@ import { jest } from '@jest/globals';
 
 const mockSearch = jest.fn();
 const mockGetAmenitiesForMany = jest.fn();
+const mockGetPhotosForMany = jest.fn();
 jest.unstable_mockModule('../../src/models/propertyModel.js', () => ({
-  PropertyModel: { search: mockSearch, getAmenitiesForMany: mockGetAmenitiesForMany },
+  PropertyModel: { search: mockSearch, getAmenitiesForMany: mockGetAmenitiesForMany, getPhotosForMany: mockGetPhotosForMany },
 }));
 
 const mockParseQuery = jest.fn();
@@ -32,6 +33,7 @@ describe('SearchOrchestratorService.search', () => {
       free_text_summary: 'depto de 2 ambientes en el centro',
     });
     mockGetAmenitiesForMany.mockResolvedValue(new Map());
+    mockGetPhotosForMany.mockResolvedValue(new Map());
   });
 
   test('si no hay candidatas, devuelve resultados vacíos sin llamar al ranking', async () => {

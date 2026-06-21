@@ -64,12 +64,12 @@ describe('POST /api/search', () => {
     expect(res.body.results.map((r) => r.title)).toEqual(['Depto B', 'Depto A']);
   });
 
-  test('si la interpretación de la IA falla, devuelve 500 con mensaje claro', async () => {
+  test('si la interpretación de la IA falla, hace fallback a búsqueda sin filtros', async () => {
     SearchInterpreterService.parseQuery.mockRejectedValue(new Error('API caída'));
 
     const res = await request(app).post('/api/search').send({ query: 'algo para alquilar' });
 
-    expect(res.status).toBe(500);
-    expect(res.body.error).toBeDefined();
+    expect(res.status).toBe(200);
+    expect(res.body.filters).toBeDefined();
   });
 });

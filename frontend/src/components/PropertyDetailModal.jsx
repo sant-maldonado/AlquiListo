@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { useToast } from '../context/ToastContext';
-import { ApplicationService } from '../services/applicationService';
-import { getErrorMessage } from '../utils/errors';
+import ApplyButton from './ApplyButton';
 
 const API_ORIGIN = (import.meta.env.VITE_API_URL || 'http://localhost:4000/api').replace(/\/api$/, '');
 
@@ -19,33 +17,8 @@ const AMENITY_LABELS = {
 };
 
 export default function PropertyDetailModal({ property, onClose }) {
-  const toast = useToast();
   const [activePhoto, setActivePhoto] = useState(0);
-  const [applying, setApplying] = useState(false);
-  const [applied, setApplied] = useState(false);
   const photos = property.photos || [];
-
-  function prev() {
-    setActivePhoto((i) => (i > 0 ? i - 1 : photos.length - 1));
-  }
-
-  function next() {
-    setActivePhoto((i) => (i < photos.length - 1 ? i + 1 : 0));
-  }
-
-  async function handleApply() {
-    setApplying(true);
-    try {
-      const app = await ApplicationService.apply(property.id);
-      setApplied(true);
-      toast.success('¡Te postulaste correctamente!');
-    } catch (err) {
-      const msg = getErrorMessage(err, 'No pudimos procesar tu postulación.');
-      toast.error(msg);
-    } finally {
-      setApplying(false);
-    }
-  }
 
   return (
     <div
@@ -80,14 +53,14 @@ export default function PropertyDetailModal({ property, onClose }) {
           {photos.length > 1 && (
             <>
               <button
-                onClick={prev}
+                onClick={() => setActivePhoto((i) => (i > 0 ? i - 1 : photos.length - 1))}
                 aria-label="Foto anterior"
                 className="absolute left-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-ink/40 font-sans text-lg text-cream hover:bg-ink/60"
               >
                 ‹
               </button>
               <button
-                onClick={next}
+                onClick={() => setActivePhoto((i) => (i < photos.length - 1 ? i + 1 : 0))}
                 aria-label="Foto siguiente"
                 className="absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-ink/40 font-sans text-lg text-cream hover:bg-ink/60"
               >
@@ -156,17 +129,7 @@ export default function PropertyDetailModal({ property, onClose }) {
             </p>
           )}
 
-          <button
-            onClick={handleApply}
-            disabled={applying || applied}
-            className={`mt-6 w-full rounded-lg px-4 py-3 font-sans text-sm font-medium ${
-              applied
-                ? 'bg-forest/20 text-forest-dark'
-                : 'bg-forest text-cream hover:bg-forest-dark'
-            } disabled:opacity-60`}
-          >
-            {applying ? 'Postulando…' : applied ? '✓ Ya te postulaste' : 'Postularme con mi perfil verificado'}
-          </button>
+          <ApplyButton propertyId={property.id} />
         </div>
       </div>
     </div>

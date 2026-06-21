@@ -1,41 +1,42 @@
 import fetch from 'node-fetch';
 
-const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
-const MODEL = 'claude-sonnet-4-6';
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const MODEL = 'llama-3.3-70b-versatile';
 
 function parseJsonResponse(text) {
   const cleaned = text.replace(/```json\s*|```\s*/g, '').trim();
   return JSON.parse(cleaned);
 }
 
-export const ClaudeClient = {
+export const GroqClient = {
   async askForJson({ system, prompt, maxTokens = 1024 }) {
-    const response = await fetch(ANTHROPIC_API_URL, {
+    const response = await fetch(GROQ_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
       },
       body: JSON.stringify({
         model: MODEL,
         max_tokens: maxTokens,
-        system,
-        messages: [{ role: 'user', content: prompt }],
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: prompt },
+        ],
       }),
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      throw new Error(`Error de la API de Claude (${response.status}): ${errText}`);
+      throw new Error(`Error de la API de Groq (${response.status}): ${errText}`);
     }
 
     const data = await response.json();
-    const textBlock = data.content.find((b) => b.type === 'text');
-    if (!textBlock) {
+    const text = data.choices?.[0]?.message?.content;
+    if (!text) {
       throw new Error('La respuesta de la IA no contiene texto');
     }
 
-    return parseJsonResponse(textBlock.text);
+    return parseJsonResponse(text);
   },
 };

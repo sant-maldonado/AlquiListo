@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { DocumentService } from '../services/documentService';
 import { useToast } from '../context/ToastContext';
 import { getErrorMessage } from '../utils/errors';
@@ -13,11 +13,15 @@ const STATUS_CONFIG = {
   error: { label: 'Hubo un error, probá de nuevo', dot: 'bg-terracotta' },
 };
 
-export default function DocumentUploader({ label, type, guarantorToken, onUploaded }) {
+export default function DocumentUploader({ label, type, guarantorToken, onUploaded, initialStatus }) {
   const toast = useToast();
-  const [status, setStatus] = useState('idle');
+  const [status, setStatus] = useState(initialStatus || 'idle');
   const [fileName, setFileName] = useState('');
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (initialStatus) setStatus(initialStatus);
+  }, [initialStatus]);
 
   async function handleFileChange(e) {
     const file = e.target.files?.[0];

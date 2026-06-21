@@ -10,6 +10,7 @@ import Perfil from './pages/Perfil';
 import MisPropiedades from './pages/MisPropiedades';
 import Buscar from './pages/Buscar';
 import MisPostulaciones from './pages/MisPostulaciones';
+import PostulacionesRecibidas from './pages/PostulacionesRecibidas';
 
 export default function App() {
   return (
@@ -50,6 +51,14 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <MisPostulaciones />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/postulaciones-recibidas"
+                element={
+                  <ProtectedRoute>
+                    <PostulacionesRecibidas />
                   </ProtectedRoute>
                 }
               />
