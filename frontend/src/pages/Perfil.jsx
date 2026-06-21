@@ -73,9 +73,10 @@ export default function Perfil() {
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
           <div className="flex items-center justify-between">
             <Link to="/" className="font-display text-xl font-semibold text-ink hover:text-forest">AlquiListo</Link>
-            <button onClick={logout} className="font-sans text-sm text-ink/60 hover:text-ink">
-              Cerrar sesión
-            </button>
+            <div className="flex items-center gap-3 font-sans text-sm">
+              <Link to="/mis-postulaciones" className="text-ink/60 hover:text-ink">Mis postulaciones</Link>
+              <button onClick={logout} className="text-ink/60 hover:text-ink">Cerrar sesión</button>
+            </div>
           </div>
 
           <div className="mt-10">

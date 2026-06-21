@@ -48,7 +48,8 @@ export default function Buscar() {
         <div className="flex items-center justify-between">
           <Link to="/" className="font-display text-xl font-semibold text-ink hover:text-forest">AlquiListo</Link>
           <div className="flex items-center gap-4 font-sans text-sm">
-            <a href="/perfil" className="text-ink/60 hover:text-ink">Mi perfil</a>
+            <Link to="/mis-postulaciones" className="text-ink/60 hover:text-ink">Mis postulaciones</Link>
+            <Link to="/perfil" className="text-ink/60 hover:text-ink">Mi perfil</Link>
             <button onClick={logout} className="text-ink/60 hover:text-ink">
               Cerrar sesión
             </button>

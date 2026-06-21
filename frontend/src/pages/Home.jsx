@@ -15,9 +15,14 @@ export default function Home() {
           {user ? (
             <div className="flex items-center gap-4 font-sans text-sm">
               {!isOwner && (
-                <Link to="/perfil" className="text-ink/60 hover:text-ink">
-                  Mi perfil
-                </Link>
+                <>
+                  <Link to="/perfil" className="text-ink/60 hover:text-ink">
+                    Mi perfil
+                  </Link>
+                  <Link to="/mis-postulaciones" className="text-ink/60 hover:text-ink">
+                    Mis postulaciones
+                  </Link>
+                </>
               )}
               <Link to={dashboardPath} className="font-medium text-forest hover:underline">
                 {dashboardLabel}

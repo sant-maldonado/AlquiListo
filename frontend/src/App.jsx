@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import Perfil from './pages/Perfil';
 import MisPropiedades from './pages/MisPropiedades';
 import Buscar from './pages/Buscar';
+import MisPostulaciones from './pages/MisPostulaciones';
 
 export default function App() {
   return (
@@ -41,6 +42,14 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <Buscar />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/mis-postulaciones"
+                element={
+                  <ProtectedRoute>
+                    <MisPostulaciones />
                   </ProtectedRoute>
                 }
               />
