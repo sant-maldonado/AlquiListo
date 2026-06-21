@@ -40,9 +40,7 @@ export const PropertyService = {
     for (const file of files) {
       formData.append('photos', file);
     }
-    const { data } = await api.post(`/properties/${id}/photos`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await api.post(`/properties/${id}/photos`, formData);
     return data.photos;
   },
 
