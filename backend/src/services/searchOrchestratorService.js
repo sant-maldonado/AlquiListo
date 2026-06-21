@@ -7,7 +7,13 @@ const RESULT_LIMIT = 15;
 
 export const SearchOrchestratorService = {
   async search(naturalLanguageQuery) {
-    const filters = await SearchInterpreterService.parseQuery(naturalLanguageQuery);
+    let filters;
+    try {
+      filters = await SearchInterpreterService.parseQuery(naturalLanguageQuery);
+    } catch (err) {
+      console.error('Error en interpretación con IA, usando búsqueda sin filtros:', err.message);
+      filters = { price_max: null, price_min: null, rooms_min: null, rooms_max: null, accepts_pets: null, neighborhood_hint: null, amenities: [], free_text_summary: '' };
+    }
 
     const candidates = await PropertyModel.search({
       priceMax: filters.price_max,
