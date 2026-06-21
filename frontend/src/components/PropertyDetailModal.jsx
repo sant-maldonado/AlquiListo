@@ -19,6 +19,14 @@ export default function PropertyDetailModal({ property, onClose }) {
   const [activePhoto, setActivePhoto] = useState(0);
   const photos = property.photos || [];
 
+  function prev() {
+    setActivePhoto((i) => (i > 0 ? i - 1 : photos.length - 1));
+  }
+
+  function next() {
+    setActivePhoto((i) => (i < photos.length - 1 ? i + 1 : 0));
+  }
+
   return (
     <div
       className="fixed inset-0 z-40 flex items-center justify-center bg-ink/40 px-4 py-8"
@@ -44,22 +52,38 @@ export default function PropertyDetailModal({ property, onClose }) {
           <button
             onClick={onClose}
             aria-label="Cerrar"
-            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-ink/60 font-sans text-cream hover:bg-ink/80"
+            className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-ink/60 font-sans text-cream hover:bg-ink/80"
           >
             ✕
           </button>
 
           {photos.length > 1 && (
-            <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
-              {photos.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActivePhoto(i)}
-                  aria-label={`Ver foto ${i + 1}`}
-                  className={`h-1.5 w-1.5 rounded-full ${i === activePhoto ? 'bg-cream' : 'bg-cream/40'}`}
-                />
-              ))}
-            </div>
+            <>
+              <button
+                onClick={prev}
+                aria-label="Foto anterior"
+                className="absolute left-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-ink/40 font-sans text-lg text-cream hover:bg-ink/60"
+              >
+                ‹
+              </button>
+              <button
+                onClick={next}
+                aria-label="Foto siguiente"
+                className="absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-ink/40 font-sans text-lg text-cream hover:bg-ink/60"
+              >
+                ›
+              </button>
+              <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+                {photos.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActivePhoto(i)}
+                    aria-label={`Ver foto ${i + 1}`}
+                    className={`h-1.5 w-1.5 rounded-full ${i === activePhoto ? 'bg-cream' : 'bg-cream/40'}`}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
 
