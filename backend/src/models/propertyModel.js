@@ -160,6 +160,21 @@ export const PropertyModel = {
     return map;
   },
 
+  async getPhotosForMany(propertyIds) {
+    if (!propertyIds || propertyIds.length === 0) return new Map();
+
+    const result = await query(
+      `SELECT * FROM property_photos WHERE property_id = ANY($1) ORDER BY position ASC, created_at ASC`,
+      [propertyIds]
+    );
+
+    const map = new Map(propertyIds.map((id) => [id, []]));
+    for (const row of result.rows) {
+      map.get(row.property_id)?.push(row);
+    }
+    return map;
+  },
+
   async addPhoto(propertyId, fileUrl, position = 0) {
     const result = await query(
       `INSERT INTO property_photos (property_id, file_url, position) VALUES ($1, $2, $3) RETURNING *`,

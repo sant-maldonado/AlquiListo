@@ -31,9 +31,11 @@ export const SearchOrchestratorService = {
     }
 
     const amenitiesMap = await PropertyModel.getAmenitiesForMany(candidates.map((p) => p.id));
+    const photosMap = await PropertyModel.getPhotosForMany(candidates.map((p) => p.id));
     const candidatesWithAmenities = candidates.map((p) => ({
       ...p,
       amenities: amenitiesMap.get(p.id) || [],
+      photos: photosMap.get(p.id) || [],
     }));
 
     let ranked;
