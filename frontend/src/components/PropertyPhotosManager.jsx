@@ -5,7 +5,7 @@ import { getErrorMessage } from '../utils/errors';
 
 const API_ORIGIN = (import.meta.env.VITE_API_URL || 'http://localhost:4000/api').replace(/\/api$/, '');
 
-export default function PropertyPhotosManager({ propertyId, initialPhotos = [] }) {
+export default function PropertyPhotosManager({ propertyId, initialPhotos = [], onPhotosChange }) {
   const toast = useToast();
   const [photos, setPhotos] = useState(initialPhotos);
   const [uploading, setUploading] = useState(false);
@@ -19,7 +19,11 @@ export default function PropertyPhotosManager({ propertyId, initialPhotos = [] }
     setUploading(true);
     try {
       const newPhotos = await PropertyService.uploadPhotos(propertyId, files);
-      setPhotos((list) => [...list, ...newPhotos]);
+      setPhotos((list) => {
+        const updated = [...list, ...newPhotos];
+        onPhotosChange?.(updated);
+        return updated;
+      });
       toast.success(`${newPhotos.length} foto${newPhotos.length > 1 ? 's' : ''} subida${newPhotos.length > 1 ? 's' : ''}.`);
     } catch (err) {
       toast.error(getErrorMessage(err, 'No pudimos subir las fotos.'));
@@ -33,7 +37,11 @@ export default function PropertyPhotosManager({ propertyId, initialPhotos = [] }
     setRemovingId(photoId);
     try {
       await PropertyService.removePhoto(propertyId, photoId);
-      setPhotos((list) => list.filter((p) => p.id !== photoId));
+      setPhotos((list) => {
+        const updated = list.filter((p) => p.id !== photoId);
+        onPhotosChange?.(updated);
+        return updated;
+      });
     } catch (err) {
       toast.error(getErrorMessage(err, 'No pudimos quitar la foto.'));
     } finally {

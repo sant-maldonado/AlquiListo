@@ -159,7 +159,7 @@ export default function MisPropiedades() {
               <PropertyForm
                 initialData={selected}
                 onSaved={handleSaved}
-                onCancel={() => setView('detail')}
+                onCancel={() => openDetail(selected)}
               />
             </div>
           </div>
@@ -208,7 +208,11 @@ export default function MisPropiedades() {
 
             <div className="mt-8">
               <p className="mb-3 font-sans text-sm font-medium text-ink">Fotos</p>
-              <PropertyPhotosManager propertyId={selected.id} initialPhotos={selected.photos || []} />
+              <PropertyPhotosManager
+                propertyId={selected.id}
+                initialPhotos={selected.photos || []}
+                onPhotosChange={(photos) => setSelected((s) => ({ ...s, photos }))}
+              />
             </div>
 
             {selected.description && (
