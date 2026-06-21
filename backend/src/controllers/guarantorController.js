@@ -1,5 +1,6 @@
 import { GuarantorModel } from '../models/guarantorModel.js';
 import { ProfileModel } from '../models/profileModel.js';
+import { EmailService } from '../services/emailService.js';
 
 export const GuarantorController = {
   async create(req, res) {
@@ -29,10 +30,11 @@ export const GuarantorController = {
         phone,
       });
 
-      res.status(201).json({
-        guarantor,
-        invite_link: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/invite/${guarantor.invite_token}`,
-      });
+      const inviteLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/invite/${guarantor.invite_token}`;
+
+      EmailService.sendGuarantorInvite(guarantor.email, guarantor.full_name, inviteLink);
+
+      res.status(201).json({ guarantor, invite_link: inviteLink });
     } catch (err) {
       console.error('guarantor create error:', err);
       res.status(500).json({ error: 'Error al crear garante' });
@@ -111,11 +113,11 @@ export const GuarantorController = {
       if (!belongs) return res.status(403).json({ error: 'No tienes permiso' });
 
       const guarantor = await GuarantorModel.regenerateInviteToken(id);
+      const inviteLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/invite/${guarantor.invite_token}`;
 
-      res.json({
-        guarantor,
-        invite_link: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/invite/${guarantor.invite_token}`,
-      });
+      EmailService.sendGuarantorInvite(guarantor.email, guarantor.full_name, inviteLink);
+
+      res.json({ guarantor, invite_link: inviteLink });
     } catch (err) {
       console.error('guarantor resendInvite error:', err);
       res.status(500).json({ error: 'Error al regenerar invitación' });

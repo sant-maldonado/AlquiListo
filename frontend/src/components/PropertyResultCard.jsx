@@ -19,35 +19,48 @@ export default function PropertyResultCard({ property, onClick }) {
   return (
     <button
       onClick={() => onClick?.(property)}
-      className="flex w-full gap-4 rounded-lg border border-line bg-white p-4 text-left transition-colors hover:border-forest/40"
+      className="group block w-full overflow-hidden rounded-xl border border-line bg-white text-left transition-shadow hover:shadow-[0_4px_24px_-8px_rgba(31,36,33,0.15)]"
     >
-      <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-cream">
+      <div className="relative aspect-[16/10] overflow-hidden bg-cream">
         {coverPhoto ? (
           <img
             src={`${API_ORIGIN}${coverPhoto.file_url}`}
             alt={property.title}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center font-sans text-xs text-ink/30">
-            Sin foto
+          <div className="flex h-full w-full items-center justify-center font-sans text-sm text-ink/25">
+            Sin foto todavía
+          </div>
+        )}
+
+        <div className="absolute left-3 top-3 rounded-full bg-cream/95 px-3 py-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.1)]">
+          <span className="font-display text-base font-medium leading-none text-ink">
+            ${Number(property.price).toLocaleString('es-AR')}
+          </span>
+        </div>
+
+        {property.accepts_pets && (
+          <div className="absolute right-3 top-3 rounded-full bg-forest-dark/90 px-2.5 py-1">
+            <span className="font-sans text-[11px] font-medium text-cream">Acepta mascotas</span>
           </div>
         )}
       </div>
 
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-sans text-sm font-medium text-ink">{property.title}</p>
-        <p className="mt-0.5 font-sans text-xs text-ink/50">
-          ${Number(property.price).toLocaleString('es-AR')} · {property.rooms} amb.
-          {property.neighborhood ? ` · ${property.neighborhood}` : ''}
+      <div className="p-4">
+        <p className="truncate font-display text-lg font-medium leading-tight text-ink">
+          {property.title}
+        </p>
+        <p className="mt-1 font-sans text-sm text-ink/50">
+          {property.rooms} amb.{property.neighborhood ? ` · ${property.neighborhood}` : ''}
         </p>
 
         {property.amenities?.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
+          <div className="mt-3 flex flex-wrap gap-1.5">
             {property.amenities.slice(0, 3).map((a) => (
               <span
                 key={a}
-                className="rounded-full bg-cream px-2 py-0.5 font-sans text-[11px] text-ink/60"
+                className="rounded-full border border-line px-2.5 py-1 font-sans text-[11px] text-ink/60"
               >
                 {AMENITY_LABELS[a] || a}
               </span>
@@ -56,9 +69,11 @@ export default function PropertyResultCard({ property, onClick }) {
         )}
 
         {property.match_reason && (
-          <p className="mt-2 font-sans text-xs italic text-forest-dark">
-            {property.match_reason}
-          </p>
+          <div className="mt-3 border-t border-line pt-3">
+            <p className="font-display text-sm italic leading-snug text-forest-dark">
+              "{property.match_reason}"
+            </p>
+          </div>
         )}
       </div>
     </button>

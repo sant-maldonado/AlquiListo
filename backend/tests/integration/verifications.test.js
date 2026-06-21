@@ -103,7 +103,7 @@ describe('GET /api/verifications/queue', () => {
       .set('Authorization', `Bearer ${adminToken}`);
 
     expect(res.status).toBe(200);
-    expect(res.body.verifications.length).toBeGreaterThanOrEqual(1);
+    expect(res.body.queue.length).toBeGreaterThanOrEqual(1);
   });
 
   test('inquilino no puede ver la cola (403)', async () => {

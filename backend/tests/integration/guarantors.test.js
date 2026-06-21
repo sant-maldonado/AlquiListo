@@ -1,12 +1,15 @@
-import request from 'supertest';
-import app from '../../src/server.js';
-import {
-  cleanDatabase,
-  closeDatabase,
-  createTestUser,
-  createTestProfile,
-  createTestGuarantor,
-} from '../helpers/db.js';
+import { jest } from '@jest/globals';
+jest.unstable_mockModule('../../src/services/emailService.js', () => ({
+  EmailService: { sendGuarantorInvite: jest.fn() },
+}));
+
+let request, app, db;
+
+beforeAll(async () => {
+  request = (await import('supertest')).default;
+  app = (await import('../../src/server.js')).default;
+  db = await import('../helpers/db.js');
+});
 
 async function loginAndGetToken(email, password = '12345678') {
   const res = await request(app).post('/api/auth/login').send({ email, password });
@@ -14,17 +17,17 @@ async function loginAndGetToken(email, password = '12345678') {
 }
 
 beforeEach(async () => {
-  await cleanDatabase();
+  await db.cleanDatabase();
 });
 
 afterAll(async () => {
-  await closeDatabase();
+  await db.closeDatabase();
 });
 
 describe('POST /api/guarantors', () => {
   test('un inquilino con perfil puede agregar un garante', async () => {
-    const user = await createTestUser({ email: 'g1@test.com', role: 'inquilino' });
-    await createTestProfile(user.id);
+    const user = await db.createTestUser({ email: 'g1@test.com', role: 'inquilino' });
+    await db.createTestProfile(user.id);
     const token = await loginAndGetToken('g1@test.com');
 
     const res = await request(app)
@@ -39,8 +42,8 @@ describe('POST /api/guarantors', () => {
   });
 
   test('rechaza un type inválido', async () => {
-    const user = await createTestUser({ email: 'g2@test.com', role: 'inquilino' });
-    await createTestProfile(user.id);
+    const user = await db.createTestUser({ email: 'g2@test.com', role: 'inquilino' });
+    await db.createTestProfile(user.id);
     const token = await loginAndGetToken('g2@test.com');
 
     const res = await request(app)
@@ -52,7 +55,7 @@ describe('POST /api/guarantors', () => {
   });
 
   test('rechaza si el inquilino todavía no tiene perfil creado', async () => {
-    await createTestUser({ email: 'g3@test.com', role: 'inquilino' });
+    await db.createTestUser({ email: 'g3@test.com', role: 'inquilino' });
     const token = await loginAndGetToken('g3@test.com');
 
     const res = await request(app)
@@ -66,11 +69,11 @@ describe('POST /api/guarantors', () => {
 
 describe('Aislamiento entre inquilinos (seguridad)', () => {
   test('un inquilino no puede ver el garante de otro inquilino', async () => {
-    const userA = await createTestUser({ email: 'userA@test.com', role: 'inquilino' });
-    const profileA = await createTestProfile(userA.id);
-    const guarantorA = await createTestGuarantor(profileA.id);
+    const userA = await db.createTestUser({ email: 'userA@test.com', role: 'inquilino' });
+    const profileA = await db.createTestProfile(userA.id);
+    const guarantorA = await db.createTestGuarantor(profileA.id);
 
-    await createTestUser({ email: 'userB@test.com', role: 'inquilino' });
+    await db.createTestUser({ email: 'userB@test.com', role: 'inquilino' });
     const tokenB = await loginAndGetToken('userB@test.com');
 
     const res = await request(app)
@@ -81,11 +84,11 @@ describe('Aislamiento entre inquilinos (seguridad)', () => {
   });
 
   test('un inquilino no puede borrar el garante de otro inquilino', async () => {
-    const userA = await createTestUser({ email: 'userC@test.com', role: 'inquilino' });
-    const profileA = await createTestProfile(userA.id);
-    const guarantorA = await createTestGuarantor(profileA.id);
+    const userA = await db.createTestUser({ email: 'userC@test.com', role: 'inquilino' });
+    const profileA = await db.createTestProfile(userA.id);
+    const guarantorA = await db.createTestGuarantor(profileA.id);
 
-    await createTestUser({ email: 'userD@test.com', role: 'inquilino' });
+    await db.createTestUser({ email: 'userD@test.com', role: 'inquilino' });
     const tokenD = await loginAndGetToken('userD@test.com');
 
     const res = await request(app)
@@ -98,9 +101,9 @@ describe('Aislamiento entre inquilinos (seguridad)', () => {
 
 describe('GET /api/guarantors/invite/:token (acceso público del garante)', () => {
   test('el garante accede con su token sin necesitar login', async () => {
-    const user = await createTestUser({ email: 'g4@test.com', role: 'inquilino' });
-    const profile = await createTestProfile(user.id);
-    const guarantor = await createTestGuarantor(profile.id);
+    const user = await db.createTestUser({ email: 'g4@test.com', role: 'inquilino' });
+    const profile = await db.createTestProfile(user.id);
+    const guarantor = await db.createTestGuarantor(profile.id);
 
     const res = await request(app).get(`/api/guarantors/invite/${guarantor.invite_token}`);
 

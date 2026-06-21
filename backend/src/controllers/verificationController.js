@@ -73,8 +73,8 @@ export const VerificationController = {
         return res.status(403).json({ error: 'Solo administradores pueden ver la cola' });
       }
 
-      const verifications = await VerificationModel.findAllPending();
-      res.json({ verifications });
+      const queue = await VerificationModel.findQueue();
+      res.json({ queue });
     } catch (err) {
       console.error('verification queue error:', err);
       res.status(500).json({ error: 'Error al obtener cola de verificación' });

@@ -1,6 +1,7 @@
 import { ApplicationModel } from '../models/applicationModel.js';
 import { ProfileModel } from '../models/profileModel.js';
 import { PropertyModel } from '../models/propertyModel.js';
+import { EmailService } from '../services/emailService.js';
 
 export const ApplicationController = {
   async create(req, res) {
@@ -31,6 +32,13 @@ export const ApplicationController = {
         profileId: profile.id,
         trustScoreSnapshot: profile.trust_score,
       });
+
+      const ownerProfile = await ProfileModel.findByUserId(property.owner_id);
+      if (ownerProfile) {
+        const ownerName = `${ownerProfile.first_name} ${ownerProfile.last_name}`;
+        const tenantName = `${profile.first_name} ${profile.last_name}`;
+        EmailService.sendNewApplication(ownerProfile.email, ownerName, property.title, tenantName);
+      }
 
       return res.status(201).json({ application });
     } catch (err) {
@@ -97,6 +105,24 @@ export const ApplicationController = {
       await ApplicationModel.rejectOthersForProperty(application.property_id, application.id);
       await PropertyModel.updateStatus(application.property_id, 'rented');
 
+      const prop = await PropertyModel.findById(application.property_id);
+
+      const acceptedProfile = await ProfileModel.findById(accepted.profile_id);
+      if (acceptedProfile) {
+        const tenantName = `${acceptedProfile.first_name} ${acceptedProfile.last_name}`;
+        EmailService.sendApplicationAccepted(acceptedProfile.email, tenantName, prop.title);
+      }
+
+      const allApps = await ApplicationModel.findByPropertyId(application.property_id);
+      for (const app of allApps) {
+        if (app.id === application.id) continue;
+        const rejectedProfile = await ProfileModel.findById(app.profile_id);
+        if (rejectedProfile) {
+          const rName = `${rejectedProfile.first_name} ${rejectedProfile.last_name}`;
+          EmailService.sendApplicationRejected(rejectedProfile.email, rName, prop.title);
+        }
+      }
+
       return res.json({ application: accepted });
     } catch (err) {
       console.error('Error en accept application:', err);
@@ -120,6 +146,14 @@ export const ApplicationController = {
       }
 
       const rejected = await ApplicationModel.reject(req.params.id);
+
+      const rejectedProfile = await ProfileModel.findById(rejected.profile_id);
+      if (rejectedProfile) {
+        const tenantName = `${rejectedProfile.first_name} ${rejectedProfile.last_name}`;
+        const prop = await PropertyModel.findById(application.property_id);
+        EmailService.sendApplicationRejected(rejectedProfile.email, tenantName, prop.title);
+      }
+
       return res.json({ application: rejected });
     } catch (err) {
       console.error('Error en reject application:', err);

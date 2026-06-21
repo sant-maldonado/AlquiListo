@@ -20,6 +20,16 @@ export default function PropertyDetailModal({ property, onClose }) {
   const [activePhoto, setActivePhoto] = useState(0);
   const photos = property.photos || [];
 
+  const stats = [
+    `${property.rooms} amb.`,
+    property.square_meters ? `${property.square_meters} m²` : null,
+    property.age_years != null
+      ? property.age_years === 0
+        ? 'A estrenar'
+        : `${property.age_years} años`
+      : null,
+  ].filter(Boolean);
+
   return (
     <div
       className="fixed inset-0 z-40 flex items-center justify-center bg-ink/40 px-4 py-8"
@@ -45,69 +55,62 @@ export default function PropertyDetailModal({ property, onClose }) {
           <button
             onClick={onClose}
             aria-label="Cerrar"
-            className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-ink/60 font-sans text-cream hover:bg-ink/80"
+            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-ink/60 font-sans text-cream hover:bg-ink/80"
           >
             ✕
           </button>
 
+          {property.accepts_pets && (
+            <div className="absolute left-3 top-3 rounded-full bg-forest-dark/90 px-2.5 py-1">
+              <span className="font-sans text-[11px] font-medium text-cream">Acepta mascotas</span>
+            </div>
+          )}
+
           {photos.length > 1 && (
-            <>
-              <button
-                onClick={() => setActivePhoto((i) => (i > 0 ? i - 1 : photos.length - 1))}
-                aria-label="Foto anterior"
-                className="absolute left-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-ink/40 font-sans text-lg text-cream hover:bg-ink/60"
-              >
-                ‹
-              </button>
-              <button
-                onClick={() => setActivePhoto((i) => (i < photos.length - 1 ? i + 1 : 0))}
-                aria-label="Foto siguiente"
-                className="absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-ink/40 font-sans text-lg text-cream hover:bg-ink/60"
-              >
-                ›
-              </button>
-              <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
-                {photos.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActivePhoto(i)}
-                    aria-label={`Ver foto ${i + 1}`}
-                    className={`h-1.5 w-1.5 rounded-full ${i === activePhoto ? 'bg-cream' : 'bg-cream/40'}`}
-                  />
-                ))}
-              </div>
-            </>
+            <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+              {photos.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActivePhoto(i)}
+                  aria-label={`Ver foto ${i + 1}`}
+                  className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                    i === activePhoto ? 'bg-cream' : 'bg-cream/40'
+                  }`}
+                />
+              ))}
+            </div>
           )}
         </div>
 
         <div className="p-6">
-          <h2 className="font-display text-xl font-medium text-ink">{property.title}</h2>
-          <p className="mt-1 font-sans text-sm text-ink/60">
-            {property.address}{property.neighborhood ? `, ${property.neighborhood}` : ''}
-          </p>
-
-          <div className="mt-4 flex items-baseline gap-2">
-            <span className="font-display text-2xl font-medium text-forest-dark">
-              ${Number(property.price).toLocaleString('es-AR')}
-            </span>
-            {property.expenses && (
-              <span className="font-sans text-sm text-ink/50">
-                + ${Number(property.expenses).toLocaleString('es-AR')} expensas
-              </span>
-            )}
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h2 className="font-display text-xl font-medium leading-tight text-ink">
+                {property.title}
+              </h2>
+              <p className="mt-1 truncate font-sans text-sm text-ink/50">
+                {property.address}{property.neighborhood ? `, ${property.neighborhood}` : ''}
+              </p>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="font-display text-2xl font-medium leading-none text-ink">
+                ${Number(property.price).toLocaleString('es-AR')}
+              </p>
+              {property.expenses && (
+                <p className="mt-1 font-sans text-xs text-ink/40">
+                  + ${Number(property.expenses).toLocaleString('es-AR')} exp.
+                </p>
+              )}
+            </div>
           </div>
 
-          {property.match_reason && (
-            <p className="mt-3 rounded-lg bg-forest/10 px-3 py-2 font-sans text-sm italic text-forest-dark">
-              {property.match_reason}
-            </p>
-          )}
-
-          <div className="mt-4 flex flex-wrap gap-3 font-sans text-sm text-ink/70">
-            <span>{property.rooms} ambiente{property.rooms > 1 ? 's' : ''}</span>
-            {property.square_meters && <span>· {property.square_meters} m²</span>}
-            {property.age_years != null && <span>· {property.age_years === 0 ? 'A estrenar' : `${property.age_years} años`}</span>}
-            {property.accepts_pets && <span>· Acepta mascotas</span>}
+          <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1 font-sans text-sm text-ink/60">
+            {stats.map((stat, i) => (
+              <span key={stat} className="flex items-center gap-3">
+                {stat}
+                {i < stats.length - 1 && <span className="text-line" aria-hidden="true">·</span>}
+              </span>
+            ))}
           </div>
 
           {property.amenities?.length > 0 && (
@@ -115,11 +118,19 @@ export default function PropertyDetailModal({ property, onClose }) {
               {property.amenities.map((a) => (
                 <span
                   key={a}
-                  className="rounded-full bg-cream px-3 py-1 font-sans text-xs text-ink/70"
+                  className="rounded-full border border-line px-3 py-1 font-sans text-xs text-ink/60"
                 >
                   {AMENITY_LABELS[a] || a}
                 </span>
               ))}
+            </div>
+          )}
+
+          {property.match_reason && (
+            <div className="mt-5 border-l-2 border-forest pl-3">
+              <p className="font-display text-base italic leading-snug text-forest-dark">
+                "{property.match_reason}"
+              </p>
             </div>
           )}
 

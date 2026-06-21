@@ -67,6 +67,17 @@ export const ProfileModel = {
     return rows[0] || null;
   },
 
+  async findByIdWithEmail(id) {
+    const { rows } = await query(
+      `SELECT p.*, u.email, u.role
+       FROM profiles p
+       JOIN users u ON u.id = p.user_id
+       WHERE p.id = $1`,
+      [id]
+    );
+    return rows[0] || null;
+  },
+
   async updateTrustScore(id, score, status) {
     const { rows } = await query(
       `UPDATE profiles SET trust_score = $1, verification_status = $2, updated_at = NOW() WHERE id = $3 RETURNING *`,

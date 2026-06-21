@@ -44,7 +44,7 @@ export default function Buscar() {
 
   return (
     <div className="min-h-screen px-6 py-10">
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-3xl">
         <div className="flex items-center justify-between">
           <span className="font-display text-xl font-semibold text-ink">AlquiListo</span>
           <div className="flex items-center gap-4 font-sans text-sm">
@@ -127,7 +127,7 @@ export default function Buscar() {
                   <p className="mb-4 font-sans text-xs text-ink/40">
                     {results.count} resultado{results.count !== 1 ? 's' : ''}
                   </p>
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {results.results.map((property) => (
                       <PropertyResultCard
                         key={property.id}

@@ -1,13 +1,21 @@
-import request from 'supertest';
-import { pool } from '../../src/config/db.js';
-import app from '../../src/server.js';
-import {
-  cleanDatabase,
-  closeDatabase,
-  createTestUser,
-  createTestProfile,
-  createTestProperty,
-} from '../helpers/db.js';
+import { jest } from '@jest/globals';
+jest.unstable_mockModule('../../src/services/emailService.js', () => ({
+  EmailService: {
+    sendNewApplication: jest.fn(),
+    sendApplicationAccepted: jest.fn(),
+    sendApplicationRejected: jest.fn(),
+  },
+}));
+
+let request, app, pool, db;
+
+beforeAll(async () => {
+  request = (await import('supertest')).default;
+  app = (await import('../../src/server.js')).default;
+  const dbConfig = await import('../../src/config/db.js');
+  pool = dbConfig.pool;
+  db = await import('../helpers/db.js');
+});
 
 async function loginAndGetToken(email, password = '12345678') {
   const res = await request(app).post('/api/auth/login').send({ email, password });
@@ -22,20 +30,20 @@ async function verifyProfile(profileId, trustScore = 50) {
 }
 
 beforeEach(async () => {
-  await cleanDatabase();
+  await db.cleanDatabase();
 });
 
 afterAll(async () => {
-  await closeDatabase();
+  await db.closeDatabase();
 });
 
 describe('POST /api/applications', () => {
   test('un inquilino con perfil verificado puede postularse', async () => {
-    const owner = await createTestUser({ email: 'owner1@test.com', role: 'propietario' });
-    const property = await createTestProperty(owner.id, { status: 'published' });
+    const owner = await db.createTestUser({ email: 'owner1@test.com', role: 'propietario' });
+    const property = await db.createTestProperty(owner.id, { status: 'published' });
 
-    const tenant = await createTestUser({ email: 'tenant1@test.com', role: 'inquilino' });
-    const profile = await createTestProfile(tenant.id);
+    const tenant = await db.createTestUser({ email: 'tenant1@test.com', role: 'inquilino' });
+    const profile = await db.createTestProfile(tenant.id);
     await verifyProfile(profile.id, 70);
     const token = await loginAndGetToken('tenant1@test.com');
 
@@ -50,11 +58,11 @@ describe('POST /api/applications', () => {
   });
 
   test('rechaza si el perfil NO está verificado', async () => {
-    const owner = await createTestUser({ email: 'owner2@test.com', role: 'propietario' });
-    const property = await createTestProperty(owner.id, { status: 'published' });
+    const owner = await db.createTestUser({ email: 'owner2@test.com', role: 'propietario' });
+    const property = await db.createTestProperty(owner.id, { status: 'published' });
 
-    const tenant = await createTestUser({ email: 'tenant2@test.com', role: 'inquilino' });
-    await createTestProfile(tenant.id);
+    const tenant = await db.createTestUser({ email: 'tenant2@test.com', role: 'inquilino' });
+    await db.createTestProfile(tenant.id);
     const token = await loginAndGetToken('tenant2@test.com');
 
     const res = await request(app)
@@ -66,11 +74,11 @@ describe('POST /api/applications', () => {
   });
 
   test('rechaza si la propiedad no está publicada', async () => {
-    const owner = await createTestUser({ email: 'owner3@test.com', role: 'propietario' });
-    const property = await createTestProperty(owner.id, { status: 'draft' });
+    const owner = await db.createTestUser({ email: 'owner3@test.com', role: 'propietario' });
+    const property = await db.createTestProperty(owner.id, { status: 'draft' });
 
-    const tenant = await createTestUser({ email: 'tenant3@test.com', role: 'inquilino' });
-    const profile = await createTestProfile(tenant.id);
+    const tenant = await db.createTestUser({ email: 'tenant3@test.com', role: 'inquilino' });
+    const profile = await db.createTestProfile(tenant.id);
     await verifyProfile(profile.id);
     const token = await loginAndGetToken('tenant3@test.com');
 
@@ -83,8 +91,8 @@ describe('POST /api/applications', () => {
   });
 
   test('un propietario no puede postularse (requireRole inquilino)', async () => {
-    const owner = await createTestUser({ email: 'owner4@test.com', role: 'propietario' });
-    const property = await createTestProperty(owner.id, { status: 'published' });
+    const owner = await db.createTestUser({ email: 'owner4@test.com', role: 'propietario' });
+    const property = await db.createTestProperty(owner.id, { status: 'published' });
     const token = await loginAndGetToken('owner4@test.com');
 
     const res = await request(app)
@@ -98,15 +106,15 @@ describe('POST /api/applications', () => {
 
 describe('GET /api/applications/property/:propertyId', () => {
   test('el dueño ve los postulantes ordenados por score', async () => {
-    const owner = await createTestUser({ email: 'owner5@test.com', role: 'propietario' });
-    const property = await createTestProperty(owner.id, { status: 'published' });
+    const owner = await db.createTestUser({ email: 'owner5@test.com', role: 'propietario' });
+    const property = await db.createTestProperty(owner.id, { status: 'published' });
 
-    const tenantA = await createTestUser({ email: 'tenantA@test.com', role: 'inquilino' });
-    const profileA = await createTestProfile(tenantA.id, { dni: '30111111' });
+    const tenantA = await db.createTestUser({ email: 'tenantA@test.com', role: 'inquilino' });
+    const profileA = await db.createTestProfile(tenantA.id, { dni: '30111111' });
     await verifyProfile(profileA.id, 40);
 
-    const tenantB = await createTestUser({ email: 'tenantB@test.com', role: 'inquilino' });
-    const profileB = await createTestProfile(tenantB.id, { dni: '30222222' });
+    const tenantB = await db.createTestUser({ email: 'tenantB@test.com', role: 'inquilino' });
+    const profileB = await db.createTestProfile(tenantB.id, { dni: '30222222' });
     await verifyProfile(profileB.id, 90);
 
     const tokenA = await loginAndGetToken('tenantA@test.com');
@@ -127,10 +135,10 @@ describe('GET /api/applications/property/:propertyId', () => {
   });
 
   test('otro propietario no puede ver los postulantes de una propiedad ajena', async () => {
-    const owner = await createTestUser({ email: 'owner6@test.com', role: 'propietario' });
-    const property = await createTestProperty(owner.id, { status: 'published' });
+    const owner = await db.createTestUser({ email: 'owner6@test.com', role: 'propietario' });
+    const property = await db.createTestProperty(owner.id, { status: 'published' });
 
-    await createTestUser({ email: 'owner7@test.com', role: 'propietario' });
+    await db.createTestUser({ email: 'owner7@test.com', role: 'propietario' });
     const otherToken = await loginAndGetToken('owner7@test.com');
 
     const res = await request(app)
@@ -143,17 +151,17 @@ describe('GET /api/applications/property/:propertyId', () => {
 
 describe('POST /api/applications/:id/accept', () => {
   test('aceptar una postulación rechaza al resto y marca la propiedad como alquilada', async () => {
-    const owner = await createTestUser({ email: 'owner8@test.com', role: 'propietario' });
-    const property = await createTestProperty(owner.id, { status: 'published' });
+    const owner = await db.createTestUser({ email: 'owner8@test.com', role: 'propietario' });
+    const property = await db.createTestProperty(owner.id, { status: 'published' });
 
-    const tenantA = await createTestUser({ email: 'tenantC@test.com', role: 'inquilino' });
-    const profileA = await createTestProfile(tenantA.id, { dni: '30333333' });
+    const tenantA = await db.createTestUser({ email: 'tenantC@test.com', role: 'inquilino' });
+    const profileA = await db.createTestProfile(tenantA.id, { dni: '30333333' });
     await verifyProfile(profileA.id);
     const tokenA = await loginAndGetToken('tenantC@test.com');
     const appA = await request(app).post('/api/applications').set('Authorization', `Bearer ${tokenA}`).send({ property_id: property.id });
 
-    const tenantB = await createTestUser({ email: 'tenantD@test.com', role: 'inquilino' });
-    const profileB = await createTestProfile(tenantB.id, { dni: '30444444' });
+    const tenantB = await db.createTestUser({ email: 'tenantD@test.com', role: 'inquilino' });
+    const profileB = await db.createTestProfile(tenantB.id, { dni: '30444444' });
     await verifyProfile(profileB.id);
     const tokenB = await loginAndGetToken('tenantD@test.com');
     const appB = await request(app).post('/api/applications').set('Authorization', `Bearer ${tokenB}`).send({ property_id: property.id });
@@ -174,11 +182,11 @@ describe('POST /api/applications/:id/accept', () => {
   });
 
   test('no se puede aceptar una postulación que ya fue resuelta', async () => {
-    const owner = await createTestUser({ email: 'owner9@test.com', role: 'propietario' });
-    const property = await createTestProperty(owner.id, { status: 'published' });
+    const owner = await db.createTestUser({ email: 'owner9@test.com', role: 'propietario' });
+    const property = await db.createTestProperty(owner.id, { status: 'published' });
 
-    const tenant = await createTestUser({ email: 'tenantE@test.com', role: 'inquilino' });
-    const profile = await createTestProfile(tenant.id);
+    const tenant = await db.createTestUser({ email: 'tenantE@test.com', role: 'inquilino' });
+    const profile = await db.createTestProfile(tenant.id);
     await verifyProfile(profile.id);
     const token = await loginAndGetToken('tenantE@test.com');
     const appRes = await request(app).post('/api/applications').set('Authorization', `Bearer ${token}`).send({ property_id: property.id });
@@ -196,11 +204,11 @@ describe('POST /api/applications/:id/accept', () => {
 
 describe('GET /api/applications/mine', () => {
   test('el inquilino ve sus propias postulaciones con datos de la propiedad', async () => {
-    const owner = await createTestUser({ email: 'owner10@test.com', role: 'propietario' });
-    const property = await createTestProperty(owner.id, { status: 'published', title: 'Depto lindo' });
+    const owner = await db.createTestUser({ email: 'owner10@test.com', role: 'propietario' });
+    const property = await db.createTestProperty(owner.id, { status: 'published', title: 'Depto lindo' });
 
-    const tenant = await createTestUser({ email: 'tenantF@test.com', role: 'inquilino' });
-    const profile = await createTestProfile(tenant.id);
+    const tenant = await db.createTestUser({ email: 'tenantF@test.com', role: 'inquilino' });
+    const profile = await db.createTestProfile(tenant.id);
     await verifyProfile(profile.id);
     const token = await loginAndGetToken('tenantF@test.com');
 
