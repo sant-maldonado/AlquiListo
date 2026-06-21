@@ -2,7 +2,7 @@ import { pool } from '../../src/config/db.js';
 import bcrypt from 'bcryptjs';
 
 export async function cleanDatabase() {
-  await pool.query('TRUNCATE TABLE verifications, documents, guarantors, profiles, property_photos, property_amenities, properties, users RESTART IDENTITY CASCADE');
+  await pool.query('TRUNCATE TABLE applications, verifications, documents, guarantors, profiles, property_photos, property_amenities, properties, users RESTART IDENTITY CASCADE');
 }
 
 export async function closeDatabase() {
