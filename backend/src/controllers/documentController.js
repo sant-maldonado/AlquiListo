@@ -4,7 +4,7 @@ import { GuarantorModel } from '../models/guarantorModel.js';
 import { StorageService } from '../services/storageService.js';
 import { VerificationOrchestratorService } from '../services/verificationOrchestratorService.js';
 
-const VALID_TYPES = ['dni_front', 'dni_back', 'recibo_sueldo', 'escritura', 'poliza_caucion', 'contrato_anterior', 'otro'];
+const VALID_TYPES = ['dni', 'dni_front', 'dni_back', 'recibo_sueldo', 'escritura', 'poliza_caucion', 'contrato_anterior', 'otro'];
 
 export const DocumentController = {
   async upload(req, res) {
