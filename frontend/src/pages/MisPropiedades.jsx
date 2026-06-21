@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { PropertyService } from '../services/propertyService';
@@ -84,7 +85,7 @@ export default function MisPropiedades() {
     <div className="min-h-screen px-6 py-10">
       <div className="mx-auto max-w-3xl">
         <div className="flex items-center justify-between">
-          <span className="font-display text-xl font-semibold text-ink">AlquiListo</span>
+          <Link to="/" className="font-display text-xl font-semibold text-ink hover:text-forest">AlquiListo</Link>
           <button onClick={logout} className="font-sans text-sm text-ink/60 hover:text-ink">
             Cerrar sesión
           </button>

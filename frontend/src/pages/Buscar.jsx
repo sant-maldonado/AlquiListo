@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { SearchService } from '../services/searchService';
 import { getErrorMessage } from '../utils/errors';
@@ -45,7 +46,7 @@ export default function Buscar() {
     <div className="min-h-screen px-6 py-10">
       <div className="mx-auto max-w-2xl">
         <div className="flex items-center justify-between">
-          <span className="font-display text-xl font-semibold text-ink">AlquiListo</span>
+          <Link to="/" className="font-display text-xl font-semibold text-ink hover:text-forest">AlquiListo</Link>
           <div className="flex items-center gap-4 font-sans text-sm">
             <a href="/perfil" className="text-ink/60 hover:text-ink">Mi perfil</a>
             <button onClick={logout} className="text-ink/60 hover:text-ink">
