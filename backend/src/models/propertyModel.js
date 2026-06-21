@@ -33,6 +33,60 @@ export const PropertyModel = {
     return result.rows;
   },
 
+  async search({ priceMax, priceMin, roomsMin, roomsMax, acceptsPets, neighborhoodHint, amenities, limit = 30 }) {
+    const conditions = [`status = 'published'`];
+    const values = [];
+
+    if (priceMax != null) {
+      values.push(priceMax);
+      conditions.push(`price <= $${values.length}`);
+    }
+    if (priceMin != null) {
+      values.push(priceMin);
+      conditions.push(`price >= $${values.length}`);
+    }
+    if (roomsMin != null) {
+      values.push(roomsMin);
+      conditions.push(`rooms >= $${values.length}`);
+    }
+    if (roomsMax != null) {
+      values.push(roomsMax);
+      conditions.push(`rooms <= $${values.length}`);
+    }
+    if (acceptsPets === true) {
+      conditions.push(`accepts_pets = true`);
+    }
+    if (neighborhoodHint) {
+      values.push(`%${neighborhoodHint}%`);
+      conditions.push(`(neighborhood ILIKE $${values.length} OR address ILIKE $${values.length})`);
+    }
+
+    let amenityJoin = '';
+    if (amenities?.length) {
+      values.push(amenities);
+      amenityJoin = `AND id IN (
+        SELECT property_id FROM property_amenities
+        WHERE amenity = ANY($${values.length})
+        GROUP BY property_id
+        HAVING COUNT(DISTINCT amenity) = ${amenities.length}
+      )`;
+    }
+
+    values.push(limit);
+    const limitParamIndex = values.length;
+
+    const sql = `
+      SELECT * FROM properties
+      WHERE ${conditions.join(' AND ')}
+      ${amenityJoin}
+      ORDER BY created_at DESC
+      LIMIT $${limitParamIndex}
+    `;
+
+    const result = await query(sql, values);
+    return result.rows;
+  },
+
   async belongsToOwner(propertyId, ownerId) {
     const result = await query(
       `SELECT id FROM properties WHERE id = $1 AND owner_id = $2`,
@@ -89,6 +143,21 @@ export const PropertyModel = {
       [propertyId]
     );
     return result.rows.map((r) => r.amenity);
+  },
+
+  async getAmenitiesForMany(propertyIds) {
+    if (!propertyIds || propertyIds.length === 0) return new Map();
+
+    const result = await query(
+      `SELECT property_id, amenity FROM property_amenities WHERE property_id = ANY($1)`,
+      [propertyIds]
+    );
+
+    const map = new Map(propertyIds.map((id) => [id, []]));
+    for (const row of result.rows) {
+      map.get(row.property_id)?.push(row.amenity);
+    }
+    return map;
   },
 
   async addPhoto(propertyId, fileUrl, position = 0) {

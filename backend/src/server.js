@@ -9,6 +9,7 @@ import guarantorRoutes from './routes/guarantorRoutes.js';
 import documentRoutes from './routes/documentRoutes.js';
 import verificationRoutes from './routes/verificationRoutes.js';
 import propertyRoutes from './routes/propertyRoutes.js';
+import searchRoutes from './routes/searchRoutes.js';
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use('/api/guarantors', guarantorRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/verifications', verificationRoutes);
 app.use('/api/properties', propertyRoutes);
+app.use('/api/search', searchRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
