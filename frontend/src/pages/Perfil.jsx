@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { ProfileService } from '../services/profileService';
@@ -106,8 +107,14 @@ export default function Perfil() {
                 ¡Tu perfil está en marcha!
               </p>
               <p className="mt-1 font-sans text-xs text-forest-dark/70">
-                La búsqueda de propiedades la construimos en el próximo paso.
+                Ya podés buscar propiedades con tu perfil verificado.
               </p>
+              <Link
+                to="/buscar"
+                className="mt-3 inline-block rounded-lg bg-forest px-4 py-2 font-sans text-sm font-medium text-cream hover:bg-forest-dark"
+              >
+                Buscar ahora →
+              </Link>
             </div>
           )}
         </div>

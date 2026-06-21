@@ -3,8 +3,9 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Home() {
   const { user, logout } = useAuth();
-  const dashboardPath = user?.role === 'propietario' ? '/mis-propiedades' : '/perfil';
-  const dashboardLabel = user?.role === 'propietario' ? 'Mis propiedades' : 'Mi perfil';
+  const isOwner = user?.role === 'propietario';
+  const dashboardPath = isOwner ? '/mis-propiedades' : '/buscar';
+  const dashboardLabel = isOwner ? 'Mis propiedades' : 'Buscar';
 
   return (
     <div className="min-h-screen px-6 py-12">
@@ -13,6 +14,11 @@ export default function Home() {
           <span className="font-display text-2xl font-semibold text-ink">AlquiListo</span>
           {user ? (
             <div className="flex items-center gap-4 font-sans text-sm">
+              {!isOwner && (
+                <Link to="/perfil" className="text-ink/60 hover:text-ink">
+                  Mi perfil
+                </Link>
+              )}
               <Link to={dashboardPath} className="font-medium text-forest hover:underline">
                 {dashboardLabel}
               </Link>
