@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PropertyService } from '../services/propertyService';
 import { useToast } from '../context/ToastContext';
 import { getErrorMessage } from '../utils/errors';
@@ -11,6 +11,17 @@ export default function PropertyPhotosManager({ propertyId, initialPhotos = [], 
   const [uploading, setUploading] = useState(false);
   const [removingId, setRemovingId] = useState(null);
   const inputRef = useRef(null);
+  const isFirstRender = useRef(true);
+  const onPhotosChangeRef = useRef(onPhotosChange);
+  onPhotosChangeRef.current = onPhotosChange;
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    onPhotosChangeRef.current?.(photos);
+  }, [photos]);
 
   async function handleFilesSelected(e) {
     const files = Array.from(e.target.files || []);
@@ -19,11 +30,7 @@ export default function PropertyPhotosManager({ propertyId, initialPhotos = [], 
     setUploading(true);
     try {
       const newPhotos = await PropertyService.uploadPhotos(propertyId, files);
-      setPhotos((list) => {
-        const updated = [...list, ...newPhotos];
-        onPhotosChange?.(updated);
-        return updated;
-      });
+      setPhotos((list) => [...list, ...newPhotos]);
       toast.success(`${newPhotos.length} foto${newPhotos.length > 1 ? 's' : ''} subida${newPhotos.length > 1 ? 's' : ''}.`);
     } catch (err) {
       toast.error(getErrorMessage(err, 'No pudimos subir las fotos.'));
@@ -37,11 +44,7 @@ export default function PropertyPhotosManager({ propertyId, initialPhotos = [], 
     setRemovingId(photoId);
     try {
       await PropertyService.removePhoto(propertyId, photoId);
-      setPhotos((list) => {
-        const updated = list.filter((p) => p.id !== photoId);
-        onPhotosChange?.(updated);
-        return updated;
-      });
+      setPhotos((list) => list.filter((p) => p.id !== photoId));
     } catch (err) {
       toast.error(getErrorMessage(err, 'No pudimos quitar la foto.'));
     } finally {

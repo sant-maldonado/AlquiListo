@@ -38,7 +38,10 @@ export default function StepDocumentos({ onFinish }) {
     <div className="space-y-6">
       <div>
         <p className="mb-3 font-sans text-sm font-medium text-ink">Tu documentación</p>
-        <DocumentUploader label="DNI (frente)" type="dni" />
+        <DocumentUploader label="DNI (frente)" type="dni_front" />
+        <div className="mt-2">
+          <DocumentUploader label="DNI (dorso)" type="dni_back" />
+        </div>
       </div>
 
       {guarantors.length > 0 && (
