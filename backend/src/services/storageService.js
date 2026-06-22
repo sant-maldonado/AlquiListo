@@ -5,8 +5,14 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const UPLOADS_DIR = join(__dirname, '..', '..', 'uploads');
 
-if (!existsSync(UPLOADS_DIR)) {
-  mkdirSync(UPLOADS_DIR, { recursive: true });
+function ensureUploadsDir() {
+  if (!existsSync(UPLOADS_DIR)) {
+    try {
+      mkdirSync(UPLOADS_DIR, { recursive: true });
+    } catch {
+      // read-only filesystem (Vercel serverless) — disk fallback skipped
+    }
+  }
 }
 
 let blobPut;
@@ -19,6 +25,14 @@ async function ensureBlob() {
   return blobPut;
 }
 
+const MIME_BY_EXT = {
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.pdf': 'application/pdf',
+};
+
 export const StorageService = {
   getUploadsDir() {
     return UPLOADS_DIR;
@@ -30,6 +44,7 @@ export const StorageService = {
       const blob = await put(filename, buffer, { access: 'public' });
       return blob.url;
     }
+    ensureUploadsDir();
     const filePath = join(UPLOADS_DIR, filename);
     writeFileSync(filePath, buffer);
     return `/uploads/${filename}`;
@@ -52,12 +67,4 @@ export const StorageService = {
     const mimeType = MIME_BY_EXT[extname(filename).toLowerCase()] || 'application/octet-stream';
     return { base64: buffer.toString('base64'), mimeType };
   },
-};
-
-const MIME_BY_EXT = {
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.webp': 'image/webp',
-  '.pdf': 'application/pdf',
 };
