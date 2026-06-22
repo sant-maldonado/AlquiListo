@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+import { extname } from 'path';
 import { PropertyModel } from '../models/propertyModel.js';
 import { StorageService } from '../services/storageService.js';
 
@@ -165,7 +167,8 @@ export const PropertyController = {
 
       const created = [];
       for (const file of req.files) {
-        const fileUrl = StorageService.buildFileUrl(file.filename);
+        const uniqueName = `${crypto.randomUUID()}${extname(file.originalname)}`;
+        const fileUrl = await StorageService.uploadFile(file.buffer, uniqueName);
         const photo = await PropertyModel.addPhoto(req.params.id, fileUrl, nextPosition);
         created.push(photo);
         nextPosition++;

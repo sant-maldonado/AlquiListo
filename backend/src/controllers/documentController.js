@@ -1,3 +1,4 @@
+import { extname } from 'path';
 import { DocumentModel } from '../models/documentModel.js';
 import { ProfileModel } from '../models/profileModel.js';
 import { GuarantorModel } from '../models/guarantorModel.js';
@@ -23,7 +24,8 @@ export const DocumentController = {
       }
 
       const { profileId, guarantorId } = req.uploadContext;
-      const fileUrl = StorageService.buildFileUrl(req.file.filename);
+      const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${extname(req.file.originalname)}`;
+      const fileUrl = await StorageService.uploadFile(req.file.buffer, uniqueName);
 
       const document = await DocumentModel.create({
         profileId,

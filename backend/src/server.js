@@ -1,8 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
 import authRoutes from './routes/authRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 import guarantorRoutes from './routes/guarantorRoutes.js';
@@ -16,10 +14,13 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+app.use(cors({
+  origin: [FRONTEND_URL, 'http://localhost:5173', 'http://localhost:4000'],
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(join(dirname(fileURLToPath(import.meta.url)), '..', 'uploads')));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'API de alquileres funcionando' });

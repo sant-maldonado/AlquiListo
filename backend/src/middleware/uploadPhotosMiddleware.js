@@ -1,21 +1,9 @@
 import multer from 'multer';
-import crypto from 'crypto';
 import { extname } from 'path';
-import { StorageService } from '../services/storageService.js';
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_FILE_SIZE_MB = 10;
 const MAX_PHOTOS_PER_UPLOAD = 10;
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, StorageService.getUploadsDir());
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${crypto.randomUUID()}${extname(file.originalname)}`;
-    cb(null, uniqueName);
-  },
-});
 
 function fileFilter(req, file, cb) {
   if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
@@ -25,7 +13,7 @@ function fileFilter(req, file, cb) {
 }
 
 export const uploadPhotosMiddleware = multer({
-  storage,
+  storage: multer.memoryStorage(),
   fileFilter,
   limits: { fileSize: MAX_FILE_SIZE_MB * 1024 * 1024 },
 }).array('photos', MAX_PHOTOS_PER_UPLOAD);

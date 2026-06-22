@@ -73,7 +73,7 @@ export const VerificationAiService = {
     }
 
     const prompt = PROMPTS_BY_TYPE[type] || PROMPTS_BY_TYPE.otro;
-    const { base64, mimeType } = StorageService.readFileAsBase64(fileUrl);
+    const { base64, mimeType } = await StorageService.readFileAsBase64(fileUrl);
 
     if (mimeType === 'application/pdf') {
       return this._callClaude(prompt, { type: 'document', source: { type: 'base64', media_type: mimeType, data: base64 } });
